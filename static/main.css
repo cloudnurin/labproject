@@ -1,0 +1,60 @@
+h2 {
+    color: green;
+    font-family: Comic sans-serif;
+    font-size: 60px;
+    text-align: center;
+    margin-top: 180px;
+    margin-bottom: 0px; 
+} 
+
+form {
+    text-align: center;
+    font-family: Didot; 
+    font-size: 30px;
+    padding: 0em 14em 2em; 
+}  
+
+button {
+    width: 50%;
+    background-color: #5D6D7E;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    font-size: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  } 
+
+input[type="text"]{
+    width: 500px;
+    height: 50px;
+    font-size: 20px; 
+    font-family: Didot;
+    background: white;
+}
+
+input[type="text"]:focus{
+    border: 1px solid #C4C4C4;
+    outline: none;
+    box-shadow: 0 0 5px 1px #C4C4C4;
+    font-size: 20px;
+    font-family: Didot;
+}
+
+input[type="password"]{
+    width: 500px;
+    height: 50px;
+    font-size: 20px;
+    background: white;
+}
+input[type="password"]:focus{
+    border: 1px solid #C4C4C4;
+    outline: none;
+    box-shadow: 0 0 5px 1px #C4C4C4;
+    font-size: 20px;
+}  
+
+body {
+    background: #D7DBDD;
+}
