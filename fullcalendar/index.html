@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>カレンダーサンプル</title>
+      <link rel="stylesheet" href='css/fullcalendar.min.css'/>
+      <link rel="stylesheet" href='css/style.css'/>
+      <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+      <script type="text/javascript" src='js/moment.min.js'></script>
+      <script type="text/javascript" src='js/fullcalendar.min.js'></script>
+      <script type="text/javascript" src='lang/ja.js'></script>
+      <script>
+         // ページ読み込み時の処理
+         $(document).ready(function () {
+
+         // カレンダーの設定
+         $('#calendar').fullCalendar({
+            height: 550,
+            lang: "ja",
+            header: {
+               left: 'prev,next today',
+               center: 'title',
+               right: 'month,basicWeek,basicDay'
+            },
+            timeFormat: 'HH:mm',
+            selectable: true,
+            selectHelper: true,
+            navLinks: true,
+            eventSources: [{
+               url: 'http://localhost:8080/getCalendar',
+               dataType: 'json',
+               async: false,
+               type : 'GET',
+               error: function() {
+                  $('#script-warning').show();
+               }
+            }],
+            select: function(start, end, resource) {
+               var title = prompt("予定タイトル:");
+               var eventData;
+               if (title) {
+                  eventData = {
+                     title: title,
+                     start: start,
+                     end: end,
+                     allDay: true
+                  };
+                  $('#calendar').fullCalendar('renderEvent', eventData, true);
+
+                  $.ajax({
+                     url: "http://localhost:8080/regist",
+                     type: "POST",
+                     data: JSON.stringify(eventData),
+                     success: function(jsonResponse) {
+                        alert("予定を登録しました。")
+                     },
+                     error: function() {
+                     }
+                  });
+               }
+               $('#calendar').fullCalendar('unselect');
+               },
+               editable: true,
+               eventLimit: true,
+            });
+         });
+      </script>
+   </head>
+   <body>
+      <div id='calendar'></div>
+   </body>
+</html>
