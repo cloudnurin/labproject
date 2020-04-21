@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+Hi {{ user.username }}!
+<p>カレンダはここに書いてあるよ！</p>
+<p><a href="{% url 'logout' %}">ログアウト</a></p>
+<p><a href="{% url 'password_change' %}">パスワード最設定</p></a></p>
+{% else %}
+<p>E407室の予約システムへようこそ！</p>
+<p>あなたはまだログインしないです</p>
+<a href="{% url 'login' %}">ログイン</a>
+{% endif %}
+{% endblock %}
