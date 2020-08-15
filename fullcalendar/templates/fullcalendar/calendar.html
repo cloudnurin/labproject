@@ -4,121 +4,399 @@
 <html>
    <head>
       <title>カレンダーサンプル</title>
+      <meta http-equiv="content-type" charset="utf-8">
       <link rel="stylesheet" href="{% static 'fullcalendar/calendar/css/fullcalendar.min.css' %}"/>
       <link rel="stylesheet" href="{% static 'fullcalendar/calendar/css/style.css' %}">
-      <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+      <link rel="stylesheet" href="{% static　'fullcalendar/calendar/bootstrap-3.3.7/css/bootstrap.min.css'　%}">
+      <link rel="stylesheet" href="{% static　'fullcalendar/calendar/bootstrap-datetimepickerv4.0.0/build-css/bootstrap-datetimepicker.css'　%}">
+      <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+      <script type="text/javascript" src="{% static 'fullcalendar/calendar/bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/moment.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/fullcalendar.min.js' %}"></script>
+      <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/script.js' %}"></script> 
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/lang/ja.js' %}"></script>
+      <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
+      <script src="{% static 'fullcalendar/calendar/bootstrap-datetimepickerv4.0.0/src-js/bootstrap-datetimepicker.js'　%}"></script>
       <script>
-         $(document).ready(function () {
-       var calendar = $('#calendar').fullCalendar({
-         height: 550,
-         lang: "ja",
-           header: {
-               left: 'prev,next today',
-               center: 'title',
-               right: 'month,agendaWeek,agendaDay'
-           },
-           events: [
-               {% for event in events %}
-                   {
-                       title: "{{ event.title}}",
-                       start: '{{ event.start|date:"Y-m-d" }}',
-                       end: '{{ event.end|date:"Y-m-d" }}',
-                       id: '{{ event.id }}',
-                   },
-               {% endfor %}
-           ],
-           selectable: true,
-           selectHelper: true,
-           editable: true,
-           eventLimit: true,
-           select: function (start, end, allDay) {
-               var title = prompt("予定タイトル:");
-               if (title) {
-                   var start = $.fullCalendar.formatDate(start, "Y-MM-DD HH:mm:ss");
-                   var end = $.fullCalendar.formatDate(end, "Y-MM-DD HH:mm:ss");
-                   $.ajax({
-                       type: "GET",
-                       url: '/fullcalendar/add_event',
-                       data: {'title': title, 'start': start, 'end': end},
-                       dataType: "json",
-                       success: function (data) {
-                           calendar.fullCalendar('refetchEvents');
-                           alert("予定を登録しました。");
-                       },
-                       failure: function (data) {
-                           alert('問題があるので、保存出来ないです!!!');
-                       }
-                   });
-               }
-           },
-           eventResize: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
-               var title = event.title;
-               var id = event.id;
-               $.ajax({
-                   type: "GET",
-                   url: '/fullcalendar/update',
-                   data: {'title': title, 'start': start, 'end': end, 'id': id},
-                   dataType: "json",
-                   success: function (data) {
-                       calendar.fullCalendar('refetchEvents');
-                       alert('Event Update');
-                   },
-                   failure: function (data) {
-                       alert('問題あります!!!');
-                   }
-               });
-           },
+          $(document).ready(function () {
+            $('#calendar').fullCalendar({
+        height: 550,
+        lang: "ja",
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'month,agendaWeek,agendaDay'
+        },
+        navLinks: true,
+        timeFormat: 'HH:mm',
+        events: [
+            
+                {% for event in events %}
+                {
+                    title: "{{ event.title}}",
+                    start: '{{ event.start|date:"Y-m-d\TH:i:s\Z" }}',
+                    end: '{{ event.end|date:"Y-m-d\TH:i:s\Z" }}',
+                    id: "{{ event.id}}",
+                    allDay: "{{ event.allDay}}",
+                },
+                {% endfor %}
+            
+        ],
+        displayEventTime: true,
+        displayEventEnd: {
+            month: true,
+            basicWeek: true,
+            "default": true
+        },
+        selectable: true,
+        selectHelper: true,
+        select: function(start, end, resource) {
+            // 日付選択された際のイベント
 
-           eventDrop: function (event) {
-               var start = $.fullCalendar.formatDate(event.start, "Y-MM-DD HH:mm:ss");
-               var end = $.fullCalendar.formatDate(event.end, "Y-MM-DD HH:mm:ss");
-               var title = event.title;
-               var id = event.id;
-               $.ajax({
-                   type: "GET",
-                   url: '/fullcalendar/update',
-                   data: {'title': title, 'start': start, 'end': end, 'id': id},
-                   dataType: "json",
-                   success: function (data) {
-                       calendar.fullCalendar('refetchEvents');
-                       alert('Event Update');
-                   },
-                   failure: function (data) {
-                       alert('問題あります!!!');
-                   }
-               });
-           },
+                // ダイアログタイトル設定
+                $("#dialogTitle").text("スケジュール登録");
+                // タイトル初期化
+                $("#inputTitle").val("");
+                // 備考初期化
+                $("#inputDescription").val("");
+                // ボタン制御
+                $("#registButton").show();
+                $("#updateButton").hide();
+                $("#deleteButton").hide();
+    
+                // ダイアログ表示
+                $('#inputScheduleForm').on('show.bs.modal', function (event) {
+                    setTimeout(function(){
+                        $('#inputTitle').focus();
+                    }, 500);
+                }).modal("show");
+    
+                // 日付ピッカーの設定
+                $('#inputYmdFrom').datetimepicker({locale: 'ja', format : 'YYYY年MM月DD日', useCurrent: false });
+                $('#inputYmdTo').datetimepicker({locale: 'ja', format : 'YYYY年MM月DD日', useCurrent: false });
+                $('.ymdHm').datetimepicker({
+                    locale: 'ja',
+                    format : 'YYYY年MM月DD日 HH時mm分'
+                });
+    
+                // 開始終了が逆転しないように制御
+                $("#inputYmdFrom").on("dp.change", function (e) {
+                    $('#inputYmdTo').data("DateTimePicker").minDate(e.date);
+                });
+                $("#inputYmdTo").on("dp.change", function (e) {
+                    $('#inputYmdFrom').data("DateTimePicker").maxDate(e.date);
+                });
+    
+                if (this.name == "month") {
+                    $('.ymdHm').hide()
+                    $('.ymd').show()
+    
+                    // 終日チェックボックス
+                    $('#allDayCheck').prop("checked", true);
+                    // 選択された日付をフォームにセット
+                    // FullCalendar の仕様で、終了が翌日の00:00になるため小細工
+                    var startYmd = moment(start);
+                    var endYmd = moment(end);
+                    if (endYmd.diff(startYmd, 'days') > 1) {
+                        endYmd = endYmd.add(-1, "days");
+                    } else {
+                        endYmd = startYmd;
+                    }
+                    $('#inputYmdFrom').val(startYmd.format("YYYY年MM月DD日"));
+                    $('#inputYmdFrom').data("DateTimePicker").date(startYmd.format("YYYY年MM月DD日"));
+                    $('#inputYmdTo').val(endYmd.format("YYYY年MM月DD日"));
+                    $('#inputYmdTo').data("DateTimePicker").date(endYmd.format("YYYY年MM月DD日"));
+                } else {
+                    $('.ymdHm').show();
+                    $('.ymd').hide();
+    
+                    // 終日チェックボックス
+                    $('#allDayCheck').prop("checked", false);
+                    var startYmd = moment(start);
+                    var endYmd = moment(end);
+                    $('#inputYmdHmFrom').val(startYmd.format("YYYY年MM月DD日 HH時mm分"));
+                    $('#inputYmdHmFrom').data("DateTimePicker").date(startYmd.format("YYYY年MM月DD日 HH時mm分"));
+                    $('#inputYmdHmTo').val(endYmd.format("YYYY年MM月DD日 HH時mm分"));
+                    $('#inputYmdHmTo').data("DateTimePicker").date(endYmd.format("YYYY年MM月DD日 HH時mm分"));
+                }
+    
+            },
+        eventClick: function(event) {
 
-           eventClick: function (event) {
-               if (confirm("削除しますか?")) {
-                   var id = event.id;
-                   $.ajax({
-                       type: "GET",
-                       url: '/fullcalendar/remove',
-                       data: {'id': id},
-                       dataType: "json",
-                       success: function (data) {
-                           calendar.fullCalendar('refetchEvents');
-                           alert('イベントを削除しました！');
-                       },
-                       failure: function (data) {
-                           alert('問題あります!!!');
-                       }
-                   });
-               }
-           },
+        // 予定クリック時のイベント
+            $("#dialogTitle").text("スケジュール詳細");
 
-       });
-   });
-</script>
-      </script>
+            // スケジュールID設定
+            $("#scheduleId").val(event.id);
+            // タイトル設定
+            $("#inputTitle").val(event.title);
+
+            // ボタン制御
+            $("#registButton").hide();
+            $("#updateButton").show();
+            $("#deleteButton").show();
+
+            // ダイアログ表示
+            $('#inputScheduleForm').on('show.bs.modal', function (event) {
+                setTimeout(function(){
+                    $('#inputTitle').focus();
+                }, 500);
+            }).modal("show");
+
+            // 日付ピッカーの設定
+            $('#inputYmdFrom').datetimepicker({locale: 'ja', format : 'YYYY年MM月DD日', useCurrent: false });
+            $('#inputYmdTo').datetimepicker({locale: 'ja', format : 'YYYY年MM月DD日', useCurrent: false });
+            $('.ymdHm').datetimepicker({
+                locale: 'ja',
+                format : 'YYYY年MM月DD日 HH時mm分'
+            });
+
+            // 開始終了が逆転しないように制御
+            $("#inputYmdFrom").on("dp.change", function (e) {
+                $('#inputYmdTo').data("DateTimePicker").minDate(e.date);
+            });
+            $("#inputYmdTo").on("dp.change", function (e) {
+                $('#inputYmdFrom').data("DateTimePicker").maxDate(e.date);
+            });
+
+            // 終日チェックボックス
+            $('#allDayCheck').prop("checked", true);
+
+            // 選択された日付をフォームにセット
+            if (this.name == "month") {
+                $('.ymdHm').hide()
+                $('.ymd').show()
+
+                // 終日チェックボックス
+                $('#allDayCheck').prop("checked", true);
+                // 選択された日付をフォームにセット
+                // FullCalendar の仕様で、終了が翌日の00:00になるため小細工
+                var startYmd = moment(start);
+                var endYmd = moment(end);
+                if (endYmd.diff(startYmd, 'days') > 1) {
+                    endYmd = endYmd.add(-1, "days");
+                } else {
+                    endYmd = startYmd;
+                }
+                $('#inputYmdFrom').val(startYmd.format("YYYY年MM月DD日"));
+                $('#inputYmdFrom').data("DateTimePicker").date(startYmd.format("YYYY年MM月DD日"));
+                $('#inputYmdTo').val(endYmd.format("YYYY年MM月DD日"));
+                $('#inputYmdTo').data("DateTimePicker").date(endYmd.format("YYYY年MM月DD日"));
+            } else {
+                $('.ymdHm').show();
+                $('.ymd').hide();
+
+                // 終日チェックボックス
+                $('#allDayCheck').prop("checked", false);
+                var startYmd = moment(event.start);
+                var endYmd = moment(event.end);
+                $('#inputYmdHmFrom').val(startYmd.format("YYYY年MM月DD日 HH時mm分"));
+                $('#inputYmdHmFrom').data("DateTimePicker").date(startYmd.format("YYYY年MM月DD日 HH時mm分"));
+                $('#inputYmdHmTo').val(endYmd.format("YYYY年MM月DD日 HH時mm分"));
+                $('#inputYmdHmTo').data("DateTimePicker").date(endYmd.format("YYYY年MM月DD日 HH時mm分"));
+            }
+        },
+    });
+         });
+
+function registSchedule() {
+
+// 開始終了日付の調整
+var startYmd = moment(formatNengappi($('#inputYmdFrom').val() + "00時00分00", 1));
+var endYmd = moment(formatNengappi($('#inputYmdTo').val() + "00時00分00", 1));
+var allDayCheck = $('#allDayCheck').prop("checked");
+if (!allDayCheck) {
+    startYmd = moment(formatNengappi($('#inputYmdHmFrom').val() + "00", 1));
+    endYmd = moment(formatNengappi($('#inputYmdHmTo').val() + "00", 1));
+}
+if (endYmd.diff(startYmd, 'days') > 0) {
+    endYmd = endYmd.add(+1, "days");
+}
+
+//非同期でサーバーにリクエストを送信
+var EventData = {
+        id: $("#scheduleId").val(),
+        title: $('#inputTitle').val(),
+            // title: event.title,
+        start: startYmd.format("YYYY-MM-DDTHH:mm:ss"),
+        end: endYmd.format("YYYY-MM-DDTHH:mm:ss"),
+        allDay: allDayCheck,
+    };
+sendAjaxRequest("add_event", EventData);
+    }
+
+function update() {
+
+// 開始終了日付の調整
+var startYmd = moment(formatNengappi($('#inputYmdFrom').val() + "00時00分00", 1));
+var endYmd = moment(formatNengappi($('#inputYmdTo').val() + "00時00分00", 1));
+var allDayCheck = $('#allDayCheck').prop("checked");
+if (!allDayCheck) {
+    startYmd = moment(formatNengappi($('#inputYmdHmFrom').val() + "00", 1));
+    endYmd = moment(formatNengappi($('#inputYmdHmTo').val() + "00", 1));
+}
+if (endYmd.diff(startYmd, 'days') > 0) {
+    endYmd = endYmd.add(+1, "days");
+}
+
+//非同期でサーバーにリクエストを送信
+var EventData = {
+        id: $("#scheduleId").val(),
+        title: $('#inputTitle').val(),
+            // title: event.title,
+        start: startYmd.format("YYYY-MM-DDTHH:mm:ss"),
+        end: endYmd.format("YYYY-MM-DDTHH:mm:ss"),
+        allDay: allDayCheck,
+    };
+sendAjaxRequest("update", EventData);
+    }
+
+    
+function remove() {
+
+    // リクエストパラメータの設定
+    var eventData = {
+            id: $("#scheduleId").val(),
+        };
+
+    sendAjaxRequest("remove", eventData);
+}    
+
+function sendAjaxRequest(method, EventData) {
+
+var cal = $("#calendar").fullCalendar("getView");
+EventData.searchStart = cal.start;
+EventData.searchEnd = cal.end;
+
+// 処理名を設定
+var methodName = "登録";
+if (method == "update") {
+    methodName = "更新"
+} else if (method == "remove") {
+    methodName = "削除"
+}
+
+$.ajax({
+    url: "/fullcalendar/" + method,
+    type: "GET",
+    //JSON data -> string
+    // data: JSON.stringify(EventData),
+    data: {'title': EventData.title, 'start': EventData.start, 'end': EventData.end,'id': EventData.id,'allDay':EventData.allDay},
+    // data: EventData,
+    // dataType: "json",
+    success: function(data) {
+        // カレンダー再描画
+    //     $('#calendar').fullCalendar('refetchEvents');
+    //     $('#calendar').fullCalendar('renderEvents',event) ;
+    //   $('#calendar').fullCalendar('renderEvents', $.parseJSON(jsonResponse) )
+    //     alert("refetch yes!");
+        $('#inputScheduleForm').modal('hide');
+        alert("予定を" + methodName + "しました。");
+    },
+    error: function(data) {
+        alert("予定の" + methodName + "に失敗しました。");
+    }
+});
+
+$('#calendar').fullCalendar('unselect');
+}
+
+function allDayCheckClick(element) {
+if (element && element.checked) {
+
+    // 日付に変換して設定
+    var startYmdHm = formatNengappi($("#inputYmdHmFrom").val() + "00", 1);
+    var endYmdHm = formatNengappi($("#inputYmdHmTo").val() + "00", 1);
+    var startYmd = moment(startYmdHm);
+    var endYmd = moment(endYmdHm);
+    $("#inputYmdFrom").val(startYmd.format("YYYY年MM月DD日"));
+    $("#inputYmdTo").val(endYmd.format("YYYY年MM月DD日"));
+
+    // 表示切替
+    $('.ymdHm').hide();
+    $('.ymd').show();
+
+} else {
+    // 日時に変換して設定
+    var startYmd = formatNengappi($("#inputYmdFrom").val(), 0);
+    var endYmd = formatNengappi($("#inputYmdTo").val(), 0);
+    var startYmdHm = moment(startYmd + "T" + moment().format("HH") + ":00:00");
+    var endYmdHm = moment(startYmd + "T" + moment().format("HH") + ":00:00").add(1, "hours");
+    $("#inputYmdHmFrom").val(startYmdHm.format("YYYY年MM月DD日 HH時mm分"));
+    $("#inputYmdHmTo").val(endYmdHm.format("YYYY年MM月DD日 HH時mm分"));
+
+    // 表示切替
+    $('.ymdHm').show();
+    $('.ymd').hide();
+}
+}
+
+function formatNengappi(nengappi, flg) {
+var ret = nengappi.replace("年", "-").replace("月", "-").replace("日", "");
+if (flg == 1){
+    ret = nengappi.replace("年", "-").replace("月", "-").replace("日", "T").replace("時",":").replace("分",":").replace(" ","");
+}
+return ret;
+}
+      </script>     
    </head>
    <body>
-      <div id='calendar'></div>
+      <div id='calendar'>
+         
+         
+   </div>
+      <div id="inputScheduleForm" class="modal fade" tabindex="-1">
+         <div class="modal-dialog modal-nm">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 id="dialogTitle" class="modal-title">スケジュール登録</h4>
+               </div>
+               <div class="modal-body">
+                  <div class="container">
+                     <div class="row">
+                        <div  class="col-md-2">
+                           <label for="">名前</label>
+                           <input id="userCd" type="hidden" value="" />
+                           <input id="scheduleId" type="hidden" value="" />
+                        </div>
+                        <div class="col-md-5">
+                           <input id="inputTitle" type="text" class="form-control input-sm ime-active" placeholder="名前" value="" >
+                        </div>
+                     </div>
+                     <div class="row">
+                        <div  class="col-md-2 required">
+                           <label for="">日時</label>
+                        </div>
+                        <div class="col-md-5">
+                           <div class="input-group">
+                              <div class="checkbox" style="margin-top: 0px;">
+                                 <input type="checkbox" id="allDayCheck" onclick="allDayCheckClick(this);" checked/><label for="allDayCheck">終日</label>
+                              </div>
+                           </div>
+                           <div class="form-inline">
+                              <div class="form-group" style="position:relative;">
+                                 <input id="inputYmdFrom" type="text" class="form-control input-sm ymd" value=""/>
+                                 <input id="inputYmdHmFrom" type="text" class="form-control input-sm ymdHm"/> ～
+                                 <input id="inputYmdTo" type="text" class="form-control input-sm ymd" />
+                                 <input id="inputYmdHmTo" type="text" class="form-control input-sm ymdHm" />
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <div id="inputError" class="pull-left" style="color:red; padding:5px;"></div>
+                  <button id="registButton" type="button" class="btn btn-primary" onclick="registSchedule();">登録</button>
+                  <button id="updateButton" type="button" class="btn btn-primary" onclick="update();">更新</button>
+                  <button id="deleteButton" type="button" class="btn btn-primary" onclick="remove();">削除</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+               </div>
+            </div>
+         </div>
+      </div>
    </body>
 </html>
+   
+   
