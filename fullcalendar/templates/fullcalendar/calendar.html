@@ -13,7 +13,6 @@
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/moment.min.js' %}"></script>
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/fullcalendar.min.js' %}"></script>
-      <script type="text/javascript" src="{% static 'fullcalendar/calendar/js/script.js' %}"></script> 
       <script type="text/javascript" src="{% static 'fullcalendar/calendar/lang/ja.js' %}"></script>
       <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
       <script src="{% static 'fullcalendar/calendar/bootstrap-datetimepickerv4.0.0/src-js/bootstrap-datetimepicker.js'　%}"></script>
@@ -217,7 +216,6 @@ if (endYmd.diff(startYmd, 'days') > 0) {
 var EventData = {
         id: $("#scheduleId").val(),
         title: $('#inputTitle').val(),
-            // title: event.title,
         start: startYmd.format("YYYY-MM-DDTHH:mm:ss"),
         end: endYmd.format("YYYY-MM-DDTHH:mm:ss"),
         allDay: allDayCheck,
@@ -243,15 +241,13 @@ if (endYmd.diff(startYmd, 'days') > 0) {
 var EventData = {
         id: $("#scheduleId").val(),
         title: $('#inputTitle').val(),
-            // title: event.title,
         start: startYmd.format("YYYY-MM-DDTHH:mm:ss"),
         end: endYmd.format("YYYY-MM-DDTHH:mm:ss"),
         allDay: allDayCheck,
     };
 sendAjaxRequest("update", EventData);
     }
-
-    
+   
 function remove() {
 
     // リクエストパラメータの設定
@@ -286,13 +282,21 @@ $.ajax({
     // dataType: "json",
     success: function(data) {
         // カレンダー再描画
-    //     $('#calendar').fullCalendar('refetchEvents');
+    //   $('#calendar').fullCalendar('refetchEvents');
+    // $('#calendar').fullCalendar('removeEvents');
+    $('#calendar').fullCalendar( 'removeEvents', EventData.id );
+     $('#calendar').fullCalendar('renderEvent', EventData);
+    // $('#calendar').fullCalendar('refetchEvents', EventData);
+
     //     $('#calendar').fullCalendar('renderEvents',event) ;
     //   $('#calendar').fullCalendar('renderEvents', $.parseJSON(jsonResponse) )
     //     alert("refetch yes!");
         $('#inputScheduleForm').modal('hide');
         alert("予定を" + methodName + "しました。");
-    },
+        // $('#calendar').fullCalendar('rerenderEvents' );
+        // $('#calendar').fullCalendar('updateEvent', event);    },
+        // $('#calendar').fullCalendar('refetchEvents', data);
+},
     error: function(data) {
         alert("予定の" + methodName + "に失敗しました。");
     }
