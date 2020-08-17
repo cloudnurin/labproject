@@ -284,9 +284,16 @@ $.ajax({
         // カレンダー再描画
     //   $('#calendar').fullCalendar('refetchEvents');
     // $('#calendar').fullCalendar('removeEvents');
+    console.log(EventData)
     $('#calendar').fullCalendar( 'removeEvents', EventData.id );
-     $('#calendar').fullCalendar('renderEvent', EventData);
-    // $('#calendar').fullCalendar('refetchEvents', EventData);
+
+    // $('#calendar').fullCalendar( 'addSourceEvents', EventData.id );
+    // $('#calendar').fullCalendar( 'addEventSource', EventData.id );
+    //   $('#calendar').fullCalendar('refetchEvents', EventData);
+
+      $('#calendar').fullCalendar('renderEvent', EventData);
+
+    //  $('#calendar').fullCalendar('refetchEvents', EventData);
 
     //     $('#calendar').fullCalendar('renderEvents',event) ;
     //   $('#calendar').fullCalendar('renderEvents', $.parseJSON(jsonResponse) )
