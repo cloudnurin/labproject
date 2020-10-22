@@ -1,6 +1,6 @@
 # labproject
 
-labcalendarについて
+fullcalendarについて
 ログイン無しに部屋を借りるアプリです。
 
 labcalendarというディレクトリはただ仮想環境を実行するためであるので、重要ではないです。仮想環境はDjangoを使うために、その環境にならないといけないです。
