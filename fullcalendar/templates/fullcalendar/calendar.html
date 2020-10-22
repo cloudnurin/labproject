@@ -220,7 +220,7 @@ var EventData = {
         end: endYmd.format("YYYY-MM-DDTHH:mm:ss"),
         allDay: allDayCheck,
     };
-sendAjaxRequest("add_event", EventData);
+sendAjaxRequest2("add_event", EventData);
     }
 
 function update() {
@@ -282,27 +282,10 @@ $.ajax({
     // dataType: "json",
     success: function(data) {
         // カレンダー再描画
-    //   $('#calendar').fullCalendar('refetchEvents');
-    // $('#calendar').fullCalendar('removeEvents');
-    console.log(EventData)
     $('#calendar').fullCalendar( 'removeEvents', EventData.id );
-
-    // $('#calendar').fullCalendar( 'addSourceEvents', EventData.id );
-    // $('#calendar').fullCalendar( 'addEventSource', EventData.id );
-    //   $('#calendar').fullCalendar('refetchEvents', EventData);
-
       $('#calendar').fullCalendar('renderEvent', EventData);
-
-    //  $('#calendar').fullCalendar('refetchEvents', EventData);
-
-    //     $('#calendar').fullCalendar('renderEvents',event) ;
-    //   $('#calendar').fullCalendar('renderEvents', $.parseJSON(jsonResponse) )
-    //     alert("refetch yes!");
         $('#inputScheduleForm').modal('hide');
-        alert("予定を" + methodName + "しました。");
-        // $('#calendar').fullCalendar('rerenderEvents' );
-        // $('#calendar').fullCalendar('updateEvent', event);    },
-        // $('#calendar').fullCalendar('refetchEvents', data);
+        alert("予定を" + methodName + "しました。");        
 },
     error: function(data) {
         alert("予定の" + methodName + "に失敗しました。");
@@ -311,6 +294,77 @@ $.ajax({
 
 $('#calendar').fullCalendar('unselect');
 }
+
+function sendAjaxRequest2(method, EventData) {
+
+var cal = $("#calendar").fullCalendar("getView");
+EventData.searchStart = cal.start;
+EventData.searchEnd = cal.end;
+
+// 処理名を設定
+var methodName = "登録";
+
+$.ajax({
+    url: "/fullcalendar/add_event",
+    type: "GET",
+    data: {'title': EventData.title, 'start': EventData.start, 'end': EventData.end,'id': EventData.id,'allDay':EventData.allDay},
+    success: function(data) {
+        // カレンダー再描画
+        $('#inputScheduleForm').modal('hide');
+        alert("予定を" + methodName + "しました。");
+        location.reload();
+        
+},
+    error: function(data) {
+        alert("予定の" + methodName + "に失敗しました。");
+    }
+});
+
+$('#calendar').fullCalendar('unselect');
+}
+
+// function sendAjaxRequest(method, EventData) {
+
+// var cal = $("#calendar").fullCalendar("getView");
+// EventData.searchStart = cal.start;
+// EventData.searchEnd = cal.end;
+
+// // 処理名を設定
+// var methodName = "登録";
+// if (method == "update") {
+//     methodName = "更新"
+// } else if (method == "remove") {
+//     methodName = "削除"
+// }
+
+// $.ajax({
+//     url: "/fullcalendar/" + method,
+//     type: "GET",
+//     data: {'title': EventData.title, 'start': EventData.start, 'end': EventData.end,'id': EventData.id,'allDay':EventData.allDay},
+//     success: function(data) {
+//         // カレンダー再描画
+//     console.log(data)
+//     var a = data;
+//     $.ajax({
+//         type: "GET",
+//         url: "/fullcalendar/calendar",
+//         success: function(data2){
+//         console.log('data latest', data2)
+//         location.reload();
+//         }
+//     });
+//     $('#calendar').fullCalendar( 'removeEvents', EventData.id );
+//       $('#calendar').fullCalendar('renderEvent', EventData);
+//       $('#inputScheduleForm').modal('hide');
+//         alert("予定を" + methodName + "しました。");
+// },
+//     error: function(data) {
+//         alert("予定の" + methodName + "に失敗しました。");
+//     }
+// });
+
+// $('#calendar').fullCalendar('unselect');
+// }
 
 function allDayCheckClick(element) {
 if (element && element.checked) {

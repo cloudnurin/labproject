@@ -28,6 +28,7 @@ def add_event(request):
 
 def update(request):
     id = request.GET.get("id", None)
+    print(id)
     event = Events.objects.get(id=id)
     title = request.GET.get("title", None)
     start = request.GET.get("start", None)
